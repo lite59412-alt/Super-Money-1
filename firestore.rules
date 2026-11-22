@@ -1,0 +1,185 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isNotBanned() {
+      return isAuthenticated() &&
+        (!exists(/databases/$(database)/documents/users/$(request.auth.uid)) ||
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isBanned != true);
+    }
+
+    // ===============================================================
+    // Users Collection: users/{uid}
+    // ===============================================================
+    match /users/{uid} {
+      // Users can read only their own profile; admins can read all users
+      allow read: if isOwner(uid) || isAdmin();
+
+      // New users can only create their own document with role='user', isBanned=false, and 0 balances
+      allow create: if isOwner(uid)
+        && request.resource.data.uid == uid
+        && request.resource.data.role == 'user'
+        && request.resource.data.isBanned == false
+        && request.resource.data.walletBalance == 0
+        && request.resource.data.bonusBalance == 0;
+
+      // Users can update their own document without changing role, isBanned, status, uid, or customWinRatio.
+      // Admins have full update permissions (e.g., approve deposits, credit balance, ban/unban, KYC, win ratio).
+      allow update: if isAdmin() || (
+        isOwner(uid)
+        && isNotBanned()
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.isBanned == resource.data.isBanned
+        && request.resource.data.status == resource.data.status
+        && request.resource.data.get('customWinRatio', null) == resource.data.get('customWinRatio', null)
+      );
+
+      allow delete: if isAdmin();
+    }
+
+    // ===============================================================
+    // Non-PII Referral Code Lookup: referral_codes/{code}
+    // ===============================================================
+    match /referral_codes/{code} {
+      allow get: if isAuthenticated();
+      allow list: if isAdmin();
+      allow create: if isAuthenticated()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.code == code;
+      allow update, delete: if isAdmin();
+    }
+
+    // ===============================================================
+    // Transactions (Deposits & Withdrawals): transactions/{txId}
+    // ===============================================================
+    match /transactions/{txId} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+
+      allow create: if isAuthenticated()
+        && isNotBanned()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.type in ['deposit', 'withdraw']
+        && request.resource.data.amount is number
+        && request.resource.data.amount > 0;
+
+      // Only admins can approve/reject/complete transactions
+      allow update, delete: if isAdmin();
+    }
+
+    // ===============================================================
+    // Game History: game_history/{sessionId}
+    // ===============================================================
+    match /game_history/{sessionId} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow create: if isAuthenticated()
+        && isNotBanned()
+        && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // ===============================================================
+    // Referrals: referrals/{referralId}
+    // ===============================================================
+    match /referrals/{referralId} {
+      allow read: if isAdmin() || (
+        isAuthenticated() && (
+          resource.data.referrerUserId == request.auth.uid ||
+          resource.data.referredUserId == request.auth.uid
+        )
+      );
+      allow create: if isAdmin() || (
+        isAuthenticated()
+        && request.resource.data.referredUserId == request.auth.uid
+        && request.resource.data.referrerUserId != request.auth.uid
+      );
+      allow update, delete: if isAdmin();
+    }
+
+    // ===============================================================
+    // Notifications: notifications/{notificationId}
+    // ===============================================================
+    match /notifications/{notificationId} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow create: if isAdmin() || (
+        isAuthenticated() && request.resource.data.userId == request.auth.uid
+      );
+      allow update: if isAdmin() || (
+        isAuthenticated()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read'])
+      );
+      allow delete: if isAdmin();
+    }
+
+    // ===============================================================
+    // Wallet Ledger: ledger/{entryId}
+    // ===============================================================
+    match /ledger/{entryId} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow create: if isAdmin() || (
+        isAuthenticated() && isNotBanned() && request.resource.data.userId == request.auth.uid
+      );
+      allow update, delete: if isAdmin();
+    }
+
+    // ===============================================================
+    // Community Reviews: reviews/{reviewId}
+    // ===============================================================
+    match /reviews/{reviewId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5;
+      allow update: if isAdmin() || (
+        isAuthenticated() && (
+          resource.data.userId == request.auth.uid ||
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reportedBy'])
+        )
+      );
+      allow delete: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+    }
+
+    // ===============================================================
+    // App Config Documents: app_config/{configId}
+    // ===============================================================
+    match /app_config/{configId} {
+      // admin_emails is admin-only; app_release & connection_test are public so friends can download the APK without login
+      allow read: if configId == 'admin_emails'
+        ? isAdmin()
+        : (configId == 'connection_test' || configId == 'app_release' || isAuthenticated());
+      allow write: if isAdmin();
+    }
+
+    // ===============================================================
+    // Admin Audit Logs: audit_logs/{logId}
+    // ===============================================================
+    match /audit_logs/{logId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Default deny everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

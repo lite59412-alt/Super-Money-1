@@ -1,0 +1,6 @@
+{
+  "name": "GameReward",
+  "description": "Transparent skill-based gaming and rewards platform with server-verified wallet ledger, KYC verification, and owner admin console.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

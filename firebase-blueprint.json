@@ -1,0 +1,217 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Registered player or admin account stored at users/{uid}",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "mobile": { "type": "string" },
+        "state": { "type": "string" },
+        "walletBalance": { "type": "number" },
+        "bonusBalance": { "type": "number" },
+        "pendingWithdrawalBalance": { "type": "number" },
+        "totalEarnings": { "type": "number" },
+        "totalWithdrawals": { "type": "number" },
+        "totalDeposits": { "type": "number" },
+        "referralCode": { "type": "string" },
+        "referredBy": { "type": "string" },
+        "referredByUid": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "isBanned": { "type": "boolean" },
+        "status": { "type": "string", "enum": ["active", "suspended"] },
+        "kycStatus": { "type": "string", "enum": ["unverified", "pending", "verified", "rejected"] },
+        "dailyStreak": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "name", "email", "walletBalance", "bonusBalance", "referralCode", "role", "isBanned", "createdAt"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Deposit and withdrawal requests stored in transactions/{txId} with optional compressed Base64 payment screenshot",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "type": { "type": "string", "enum": ["deposit", "withdraw"] },
+        "amount": { "type": "number" },
+        "bonusAmount": { "type": "number" },
+        "creditedAmount": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "displayStatus": { "type": "string" },
+        "utrNumber": { "type": "string" },
+        "upiId": { "type": "string" },
+        "paymentMethod": { "type": "string" },
+        "screenshotBase64": { "type": "string" },
+        "rejectionReason": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "userName", "type", "amount", "status", "createdAt"]
+    },
+    "GameHistory": {
+      "title": "GameHistory",
+      "description": "Completed arcade and casino game round logs stored in game_history/{sessionId}",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "gameId": { "type": "string" },
+        "gameName": { "type": "string" },
+        "entryFee": { "type": "number" },
+        "score": { "type": "number" },
+        "won": { "type": "boolean" },
+        "rewardEarned": { "type": "number" },
+        "playedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "gameId", "gameName", "entryFee", "won", "rewardEarned", "playedAt"]
+    },
+    "Referral": {
+      "title": "Referral",
+      "description": "Referral relationships and reward payouts stored in referrals/{referralId}",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "referrerUserId": { "type": "string" },
+        "referrerName": { "type": "string" },
+        "referredUserId": { "type": "string" },
+        "referredUserName": { "type": "string" },
+        "referralCode": { "type": "string" },
+        "rewardType": { "type": "string", "enum": ["signup", "deposit", "invitation"] },
+        "qualifyingTransactionId": { "type": "string" },
+        "qualifyingAmount": { "type": "number" },
+        "rewardPercentage": { "type": "number" },
+        "rewardAmount": { "type": "number" },
+        "status": { "type": "string", "enum": ["Pending", "Qualified", "Reward Credited", "Reversed"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "referrerUserId", "referredUserId", "referralCode", "rewardType", "rewardAmount", "status", "createdAt"]
+    },
+    "ReferralCodeLookup": {
+      "title": "ReferralCodeLookup",
+      "description": "Public non-PII referral code mapping stored at referral_codes/{code}",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "uid": { "type": "string" },
+        "name": { "type": "string" }
+      },
+      "required": ["code", "uid", "name"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "Per-user alerts stored in notifications/{notificationId}",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "category": { "type": "string" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "title", "message", "read", "createdAt"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "Player reviews stored in reviews/{reviewId}",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "rating": { "type": "number" },
+        "comment": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "userName", "rating", "comment", "createdAt"]
+    },
+    "LedgerEntry": {
+      "title": "LedgerEntry",
+      "description": "Wallet ledger audit trail stored in ledger/{entryId}",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "type": { "type": "string" },
+        "bucket": { "type": "string", "enum": ["available", "bonus"] },
+        "amount": { "type": "number" },
+        "status": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "type", "bucket", "amount", "title", "createdAt"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Admin audit trail stored in audit_logs/{logId}",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "actor": { "type": "string" },
+        "action": { "type": "string" },
+        "details": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "actor", "action", "details", "createdAt"]
+    },
+    "AppConfig": {
+      "title": "AppConfig",
+      "description": "Global application configuration documents under app_config/{docId} (payment_methods, announcements, referral_settings, app_release, games, withdrawal_config, bonuses, admin_emails)",
+      "type": "object",
+      "properties": {
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "updatedBy": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "User",
+      "description": "User profiles, wallets, KYC status, and role assignments"
+    },
+    "/transactions/{txId}": {
+      "schema": "Transaction",
+      "description": "Deposit and withdrawal requests"
+    },
+    "/game_history/{sessionId}": {
+      "schema": "GameHistory",
+      "description": "Recorded arcade and casino game sessions"
+    },
+    "/referrals/{referralId}": {
+      "schema": "Referral",
+      "description": "Referral relationships and reward ledger"
+    },
+    "/referral_codes/{code}": {
+      "schema": "ReferralCodeLookup",
+      "description": "Non-PII lookup from referral code to referrer UID and display name"
+    },
+    "/notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "Per-user notification feed"
+    },
+    "/reviews/{reviewId}": {
+      "schema": "Review",
+      "description": "Community reviews"
+    },
+    "/ledger/{entryId}": {
+      "schema": "LedgerEntry",
+      "description": "Detailed wallet transaction ledger"
+    },
+    "/audit_logs/{logId}": {
+      "schema": "AuditLog",
+      "description": "Admin action audit trail"
+    },
+    "/app_config/{configId}": {
+      "schema": "AppConfig",
+      "description": "Global configuration documents managed by admins"
+    }
+  }
+}

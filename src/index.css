@@ -1,0 +1,438 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --app-safe-top: env(safe-area-inset-top, 0px);
+    --app-safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  html {
+    background-color: #071126;
+    overscroll-behavior-y: none;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #071126;
+    color: #f1f5f9;
+    overflow-x: hidden;
+    overscroll-behavior-y: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  button,
+  a,
+  [role='button'] {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .font-mono-num {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+.pt-safe-top {
+  padding-top: max(env(safe-area-inset-top, 0px), var(--app-safe-top, 0px));
+}
+
+.pt-safe-page {
+  padding-top: calc(max(env(safe-area-inset-top, 0px), var(--app-safe-top, 0px)) + 1.25rem);
+}
+
+.pb-safe {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px), var(--app-safe-bottom, 0px));
+}
+
+.pb-safe-nav {
+  padding-bottom: calc(5.5rem + max(env(safe-area-inset-bottom, 0px), var(--app-safe-bottom, 0px)));
+}
+
+.top-safe-toast {
+  top: calc(max(env(safe-area-inset-top, 0px), var(--app-safe-top, 0px)) + 4.25rem);
+}
+
+/* Custom sleek scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #071126;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e3a6e;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2b4f94;
+}
+
+/* Subtle Lottie-style UTR submission success animation */
+@keyframes lottiePopScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.72);
+  }
+  58% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes lottieRingDraw {
+  0% {
+    stroke-dashoffset: 240;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes lottieCheckDraw {
+  0% {
+    stroke-dashoffset: 64;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes lottieRipple {
+  0% {
+    opacity: 0.55;
+    transform: scale(0.88);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.52);
+  }
+}
+
+@keyframes lottieSparkOut {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.4);
+  }
+  30% {
+    opacity: 1;
+    transform: translate(var(--tx), var(--ty)) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--tx) * 1.45), calc(var(--ty) * 1.45)) scale(0.2);
+  }
+}
+
+.animate-lottie-pop {
+  animation: lottiePopScale 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-lottie-ring {
+  stroke-dasharray: 240;
+  stroke-dashoffset: 240;
+  animation: lottieRingDraw 0.65s cubic-bezier(0.65, 0, 0.35, 1) 0.08s forwards;
+}
+
+.animate-lottie-check {
+  stroke-dasharray: 64;
+  stroke-dashoffset: 64;
+  animation: lottieCheckDraw 0.42s cubic-bezier(0.22, 1, 0.36, 1) 0.46s forwards;
+}
+
+.animate-lottie-ripple {
+  animation: lottieRipple 1.8s cubic-bezier(0.22, 1, 0.36, 1) 0.35s infinite;
+}
+
+.animate-lottie-spark {
+  animation: lottieSparkOut 0.95s cubic-bezier(0.16, 1, 0.3, 1) 0.48s both;
+}
+
+/* Game Win (2.5s) & 1-Second Loss Overlay Animations */
+@keyframes outcomeWinLifecycle {
+  0% {
+    opacity: 0;
+    transform: scale(0.58) translateY(18px);
+  }
+  12% {
+    opacity: 1;
+    transform: scale(1.07) translateY(-3px);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  52% {
+    opacity: 1;
+    transform: scale(1.02) translateY(-2px);
+  }
+  86% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.92) translateY(-12px);
+  }
+}
+
+@keyframes outcomeLoseLifecycle {
+  0% {
+    opacity: 0;
+    transform: scale(0.84) translateY(8px);
+  }
+  18% {
+    opacity: 1;
+    transform: scale(1.02) translateY(0);
+  }
+  75% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.95) translateY(-6px);
+  }
+}
+
+@keyframes outcomeShake {
+  0%, 100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  20% {
+    transform: translateX(-4px) rotate(-8deg);
+  }
+  40% {
+    transform: translateX(4px) rotate(8deg);
+  }
+  60% {
+    transform: translateX(-2px) rotate(-4deg);
+  }
+  80% {
+    transform: translateX(2px) rotate(4deg);
+  }
+}
+
+@keyframes outcomeConfetti {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.3) rotate(0deg);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(calc(var(--tx) * 0.85), calc(var(--ty) * 0.85)) scale(1.1) rotate(var(--rot));
+  }
+  75% {
+    opacity: 0.9;
+    transform: translate(calc(var(--tx) * 1.25), calc(var(--ty) * 1.25 + 14px)) scale(0.85) rotate(calc(var(--rot) * 1.45));
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--tx) * 1.45), calc(var(--ty) * 1.45 + 34px)) scale(0.3) rotate(calc(var(--rot) * 1.9));
+  }
+}
+
+@keyframes outcomeCoinBurst {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.35) rotateY(0deg);
+  }
+  22% {
+    opacity: 1;
+    transform: translate(var(--tx), var(--ty)) scale(1.08) rotateY(180deg);
+  }
+  72% {
+    opacity: 1;
+    transform: translate(var(--tx), calc(var(--ty) - 10px)) scale(1) rotateY(540deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx), calc(var(--ty) + 18px)) scale(0.5) rotateY(720deg);
+  }
+}
+
+@keyframes outcomeSunburst {
+  0% {
+    opacity: 0;
+    transform: scale(0.65) rotate(0deg);
+  }
+  18% {
+    opacity: 0.65;
+    transform: scale(1.05) rotate(28deg);
+  }
+  85% {
+    opacity: 0.5;
+    transform: scale(1.1) rotate(135deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.15) rotate(165deg);
+  }
+}
+
+@keyframes outcomeRingPulse {
+  0% {
+    opacity: 0.75;
+    transform: scale(0.55);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.95);
+  }
+}
+
+@keyframes outcomeTrophyBounce {
+  0% {
+    transform: scale(0.55) rotate(-14deg);
+  }
+  40% {
+    transform: scale(1.18) rotate(8deg);
+  }
+  65% {
+    transform: scale(0.96) rotate(-4deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes outcomeShimmer {
+  0% {
+    transform: translateX(-125%);
+  }
+  100% {
+    transform: translateX(145%);
+  }
+}
+
+.animate-outcome-win-lifecycle {
+  animation: outcomeWinLifecycle 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-outcome-lose-lifecycle {
+  animation: outcomeLoseLifecycle 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-outcome-shake {
+  animation: outcomeShake 0.45s ease-in-out 0.1s both;
+}
+
+.animate-outcome-confetti {
+  animation: outcomeConfetti 2.05s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-outcome-coin {
+  animation: outcomeCoinBurst 2.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-outcome-sunburst {
+  animation: outcomeSunburst 2.5s linear forwards;
+}
+
+.animate-outcome-ring {
+  animation: outcomeRingPulse 1.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-outcome-trophy {
+  animation: outcomeTrophyBounce 0.72s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+}
+
+.animate-outcome-shimmer {
+  animation: outcomeShimmer 1.05s ease-in-out 0.22s forwards;
+}
+
+.animate-outcome-glow {
+  animation: outcomeRingPulse 2.2s ease-out forwards;
+}
+
+/* Smooth GPU-composited Arcade Game Animation Primitives */
+.perspective-800 {
+  perspective: 800px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+@keyframes boardMicroShake {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  18% {
+    transform: translate3d(-5px, 2px, 0);
+  }
+  36% {
+    transform: translate3d(5px, -2px, 0);
+  }
+  54% {
+    transform: translate3d(-3px, 1px, 0);
+  }
+  72% {
+    transform: translate3d(3px, -1px, 0);
+  }
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+}
+
+.animate-board-shake {
+  animation: boardMicroShake 0.42s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes symbolWinPop {
+  0% {
+    transform: scale(0.92);
+  }
+  45% {
+    transform: scale(1.14);
+  }
+  75% {
+    transform: scale(0.98);
+  }
+  100% {
+    transform: scale(1.04);
+  }
+}
+
+.animate-symbol-win {
+  animation: symbolWinPop 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes ringChargePulse {
+  0% {
+    opacity: 0.85;
+    transform: scale(0.94);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.18);
+  }
+}
+
+.animate-ring-charge {
+  animation: ringChargePulse 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+
+
