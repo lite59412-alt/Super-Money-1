@@ -1,1 +1,59 @@
 
+name: Build Super Money APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install Dependencies
+        run: |
+          npm install --legacy-peer-deps
+          npm install @capacitor/assets --save-dev --legacy-peer-deps
+
+      - name: Build Web App
+        run: npm run build
+
+      - name: Add Android Platform
+        run: npx cap add android
+
+      - name: Generate App Icons
+        run: |
+          if [ -f "resources/icon.png" ]; then
+            npx capacitor-assets generate --android
+          fi
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      - name: Build Debug APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Super-Money-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          
